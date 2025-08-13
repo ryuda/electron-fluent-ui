@@ -5,13 +5,20 @@ const createBrowserWindow = (): BrowserWindow => {
     const preloadScriptFilePath = join(__dirname, "..", "dist-preload", "index.js");
 
     return new BrowserWindow({
+        height: 55, // 원하는 높이 설정 (예: 600px)
+        width: 400,
         autoHideMenuBar: true,
+        frame: false,
+        maximizable: false, // 창 최대화 비활성화
+        fullscreenable: false, // 전체 화면 전환 비활성화
         backgroundMaterial: "mica",
         vibrancy: "header",
         webPreferences: {
             preload: preloadScriptFilePath,
         },
         icon: join(__dirname, "..", "build", "app-icon-dark.png"),
+    }).on("will-resize", (event) => {
+        event.preventDefault(); // 창 크기 조정 시도 차단
     });
 };
 
@@ -43,4 +50,5 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
+    // mainWindow.webContents.openDevTools();
 })();

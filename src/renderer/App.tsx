@@ -44,41 +44,24 @@ export const App = () => {
                     display: "flex",
                     flexDirection: "row",
                     boxSizing: "border-box",
+                    WebkitAppRegion: "drag", // 드래그 가능 설정
+                    borderRadius: "20px",
+                    overflow: "hidden",
+                    // backgroundColor: theme.colorBackgroundOverlay,
                 }}
             >
-                <Sidebar theme={theme} />
+                {/*<Sidebar theme={theme} />*/}
                 <div
                     style={{
                         display: "flex",
                         flexDirection: "column",
                         width: "100%",
-                        gap: 20,
-                        padding: 20,
+                        // gap: 20,
+                        padding: 10,
                         boxSizing: "border-box",
                     }}
                 >
                     <Header />
-                    <Header2 />
-                    <div style={{ flexGrow: 1 }}>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHeaderCell style={{ width: 50 }}>From</TableHeaderCell>
-                                    <TableHeaderCell>Subject</TableHeaderCell>
-                                    <TableHeaderCell style={{ width: 100 }}>Received on</TableHeaderCell>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <Mails isLoading={isLoading} />
-                            </TableBody>
-                        </Table>
-                    </div>
-                    <MessageBar>
-                        <MessageBarBody>
-                            <MessageBarTitle>Update available</MessageBarTitle>
-                            Click <Link>here</Link> to install.
-                        </MessageBarBody>
-                    </MessageBar>
                 </div>
             </div>
         </FluentProvider>

@@ -5,6 +5,7 @@ import { defineConfig, type AliasOptions } from "vite";
 import electron from "vite-plugin-electron";
 import renderer from "vite-plugin-electron-renderer";
 import pkg from "./package.json";
+import tailwindcss from '@tailwindcss/vite'
 
 const rendererRoot = join(__dirname, "src", "renderer");
 const mainEntryPoint = join(__dirname, "src", "main", "index.ts");
@@ -38,6 +39,7 @@ export default defineConfig(({ command }) => {
         resolve,
         plugins: [
             react(),
+            tailwindcss(),
             electron([
                 {
                     entry: mainEntryPoint,
