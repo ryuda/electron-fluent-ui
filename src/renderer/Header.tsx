@@ -2,6 +2,17 @@ import { Avatar, Input, Text } from "@fluentui/react-components";
 import { SearchRegular } from "@fluentui/react-icons";
 import { useState } from "react";
 
+// Electron 렌더러 프로세스의 window 객체에 대한 타입 확장
+declare global {
+  interface Window {
+    electron?: {
+      ipcRenderer: {
+        send: (channel: string, ...args: unknown[]) => void;
+      };
+    };
+  }
+}
+
 export const Header = () => {
     const [command, setCommand] = useState("");
 
@@ -13,12 +24,32 @@ export const Header = () => {
     // 엔터 키 입력 시 처리
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && command) {
-            // Electron 메인 프로세스에 명령어 전달
-            // if (window.electron) {
-            //     window.electron.ipcRenderer.send("execute-command", command);
-            // }
-            // console.log("Hello World");
-            // alert(command);
+            // URL 형식 검증
+            let url = command;
+
+            // URL에 프로토콜이 없으면 http:// 추가
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+
+            try {
+                // URL이 유효한지 확인
+                new URL(url);
+
+                // Electron 환경에서 실행 중인 경우 IPC를 통해 URL 열기
+                if (window.electron) {
+                    window.electron.ipcRenderer.send("open-url", url);
+                } else {
+                    // 일반 브라우저 환경에서는 window.open 사용
+                    window.open(url, '_blank');
+                }
+
+                // 입력 필드 초기화
+                setCommand("");
+            } catch (_error) {
+                // 유효하지 않은 URL인 경우 경고 표시
+                alert("유효하지 않은 URL입니다: " + command);
+            }
         }
     };
 

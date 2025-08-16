@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain, nativeTheme, type IpcMainEvent } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from "electron";
 import { join } from "path";
 
 const createBrowserWindow = (): BrowserWindow => {
@@ -52,3 +52,11 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
     // mainWindow.webContents.openDevTools();
 })();
+
+// 다른 코드...
+
+// URL 열기 IPC 핸들러
+ipcMain.on('open-url', (_, url) => {
+  shell.openExternal(url)
+    .catch(err => console.error('URL을 열 수 없습니다:', err));
+});

@@ -11,6 +11,7 @@
     "main": "dist-main/index.js",
     "scripts": {
         "build": "vite build",
+        "build-win": "electron-builder --windows",
         "dev": "vite",
         "lint": "eslint .",
         "package:publish": "electron-builder --config electron-builder.config.js --publish always",
