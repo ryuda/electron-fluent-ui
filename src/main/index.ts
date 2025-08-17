@@ -89,3 +89,9 @@ ipcMain.on("window-minimize", () => {
         mainWindow.minimize();
     }
 });
+
+// 앱 종료 이벤트 핸들러
+ipcMain.on("app-quit", () => {
+    console.log("JK> 리스너 app-quit");
+    app.quit();
+});

@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld("ContextBridge", <ContextBridge>{
 contextBridge.exposeInMainWorld("electron", {
     ipcRenderer: {
         send: (channel: string, ...args: unknown[]) => {
-            const validChannels = ["resize-window-height", "window-minimize", "window-close"];
+            const validChannels = ["resize-window-height", "window-minimize", "window-close", "app-quit"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, ...args);
             }
