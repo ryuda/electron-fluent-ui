@@ -15,6 +15,16 @@ declare global {
             ipcRenderer: {
                 send: (channel: string, ...args: unknown[]) => void;
             };
+            tooltip?: {
+                show: (options: {
+                    x: number;
+                    y: number;
+                    content: string;
+                    width?: number;
+                    height?: number;
+                }) => void;
+                hide: () => void;
+            };
         };
         ContextBridge: {
             onNativeThemeChanged: (callback: () => void) => void;
@@ -55,11 +65,36 @@ export const App = () => {
             setShowHeader(true);
         });
 
+        // 앱이 시작될 때 툴팁 표시 (지연 적용)
+        const tooltipTimer = setTimeout(() => {
+            if (window.electron?.tooltip) {
+                // 창의 위치에 기반하여 툴팁 위치 계산
+                const x = Math.round(window.screenX + 10);
+                const y = Math.round(window.screenY - 111); // 메인 창 위에 표시
+                
+                window.electron.tooltip.show({
+                    x,
+                    y,
+                    content: `
+                        <div style="text-align: center;">
+                            <h3 style="margin-top: 0;">i-ERP 안내</h3>
+                            <p>검색창에 원하는 내용을 입력하고 엔터 키를 누르면,<br/>
+                               검색 결과가 표시됩니다.
+                            </p>
+                            <!--<p style="font-size: 12px; margin-bottom: 0; color: #aaa;">이 툴팁을 클릭하면 닫힙니다</p>-->
+                        </div>
+                    `,
+                    width: 430,
+                    height: 110
+                });
+            }
+        }, 500); // 1.5초 후 표시
+
         return () => {
             document.removeEventListener("window-resize", handleWindowResize as EventListener);
             document.removeEventListener("window-close-event", () => {});
+            clearTimeout(tooltipTimer); // 타이머 정리
         };
-
     }, []);
 
     // 창 닫기 핸들러

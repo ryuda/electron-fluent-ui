@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell } from "electron";
+import { app, BrowserWindow, ipcMain, nativeTheme, screen, shell } from "electron";
 import { join } from "path";
 import IpcMainEvent = Electron.IpcMainEvent;
 
@@ -41,9 +41,107 @@ const loadFileOrUrl = (browserWindow: BrowserWindow) => {
     }
 };
 
+// 툴팁 윈도우 참조 변수
+let tooltipWindow: BrowserWindow | null = null;
+
+// 툴팁 윈도우 생성 함수 수정
+const createTooltipWindow = (params: { x: number, y: number, content: string, width: number, height: number }): BrowserWindow => {
+    // 기존 툴팁이 있으면 닫기
+    if (tooltipWindow && !tooltipWindow.isDestroyed()) {
+        tooltipWindow.close();
+    }
+
+    // 툴팁 윈도우 생성
+    const tooltipWin = new BrowserWindow({
+        x: params.x,
+        y: params.y,
+        width: params.width,
+        height: params.height,
+        frame: false,
+        transparent: true,
+        skipTaskbar: true,
+        resizable: false,
+        movable: false,
+        alwaysOnTop: true,
+        show: false,
+        autoHideMenuBar: true,
+        roundedCorners: true,
+        webPreferences: {
+            preload: join(__dirname, "..", "dist-preload", "index.js"),
+        },
+    });
+
+
+    // HTML 콘텐츠 설정
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+             html, body {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+                /*border-radius: 50px; !* html, body에도 border-radius 적용 *!*/
+            }
+        
+            body {
+                margin: 0px;
+                padding: 10px;
+                background-color: rgba(50, 50, 50, 0.9);
+                color: white;
+                font-family: 'Segoe UI', sans-serif;
+                /*border-radius: 10px;*/
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
+                overflow: hidden;
+                cursor: pointer;
+                
+            }
+        </style>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.addEventListener('click', () => {
+                    window.electron.tooltip.hide();
+                });
+            });
+        </script>
+    </head>
+    <body>
+        ${params.content}
+    </body>
+    </html>
+    `;
+
+    // 데이터 URL로 로드
+    tooltipWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+
+    // 준비되면 표시
+    tooltipWin.once('ready-to-show', () => {
+        tooltipWin.show();
+    });
+
+    tooltipWindow = tooltipWin;
+    return tooltipWin;
+};
+
+// IPC 이벤트 리스너 등록 함수에 툴팁 관련 이벤트 추가
 const registerIpcEventListeners = () => {
     ipcMain.on("themeShouldUseDarkColors", (event: IpcMainEvent) => {
         event.returnValue = nativeTheme.shouldUseDarkColors;
+    });
+
+    // 툴팁 표시 이벤트
+    ipcMain.on("show-tooltip", (_, params) => {
+        createTooltipWindow(params);
+    });
+
+    // 툴팁 닫기 이벤트
+    ipcMain.on("hide-tooltip", () => {
+        if (tooltipWindow && !tooltipWindow.isDestroyed()) {
+            tooltipWindow.close();
+            tooltipWindow = null;
+        }
     });
 };
 
@@ -61,7 +159,7 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...

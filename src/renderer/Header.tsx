@@ -1,10 +1,11 @@
 import {
     Avatar,
     Input,
-    Text
+    Text,
+    Button
 } from "@fluentui/react-components";
-import { SearchRegular } from "@fluentui/react-icons";
-import { useEffect, useState } from "react";
+import { SearchRegular, InfoRegular } from "@fluentui/react-icons";
+import { useEffect, useState, useRef } from "react";
 
 // Electron 렌더러 프로세스의 window 객체에 대한 타입 확장
 declare global {
@@ -12,6 +13,16 @@ declare global {
         electron?: {
             ipcRenderer: {
                 send: (channel: string, ...args: unknown[]) => void;
+            };
+            tooltip?: {
+                show: (options: {
+                    x: number;
+                    y: number;
+                    content: string;
+                    width?: number;
+                    height?: number;
+                }) => void;
+                hide: () => void;
             };
         };
     }
@@ -24,6 +35,8 @@ interface HeaderProps {
 export const Header = ({ onEnter }: HeaderProps) => {
     const [command, setCommand] = useState("");
     const [keyword, setKeyword] = useState<string>("");
+    const [tooltipVisible, setTooltipVisible] = useState(false);
+    const headerRef = useRef<HTMLDivElement>(null);
 
     // 디버깅을 위해 상태 변화 로깅
     useEffect(() => {
@@ -31,6 +44,23 @@ export const Header = ({ onEnter }: HeaderProps) => {
             onEnter(keyword);
         }
     }, [keyword, onEnter]);
+
+    // 툴팁 상태 관리를 위한 effect
+    useEffect(() => {
+        // 문서 클릭 시 툴팁 닫기
+        const handleDocumentClick = () => {
+            if (tooltipVisible) {
+                window.electron?.tooltip?.hide();
+                setTooltipVisible(false);
+            }
+        };
+
+        document.addEventListener('click', handleDocumentClick);
+        
+        return () => {
+            document.removeEventListener('click', handleDocumentClick);
+        };
+    }, [tooltipVisible]);
 
     // 명령어 입력 핸들러
     const handleCommandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,8 +91,37 @@ export const Header = ({ onEnter }: HeaderProps) => {
         }
     };
 
+    // 툴팁 표시 함수
+    const showTooltip = (e: React.MouseEvent) => {
+        e.stopPropagation(); // 이벤트 전파 방지
+        
+        if (headerRef.current && window.electron?.tooltip) {
+            const rect = headerRef.current.getBoundingClientRect();
+            
+            // 헤더 상단에 툴팁 표시
+            const x = Math.round(window.screenX + 10);
+            const y = Math.round(window.screenY - 133); // 메인 창 위에 표시
+            
+            window.electron.tooltip.show({
+                x,
+                y,
+                content: `
+                    <div style="text-align: center;">
+                        <h3 style="margin-top: 0;">도움말</h3>
+                        <p>검색창에 원하는 내용을 입력하고 엔터 키를 누르세요.</p>
+                        <p style="font-size: 12px; margin-bottom: 0; color: #aaa;">클릭하면 닫힙니다</p>
+                    </div>
+                `,
+                width: 430,
+                height: 100
+            });
+
+            setTooltipVisible(true);
+        }
+    };
+
     return (
-        <>
+        <div ref={headerRef}>
             <div
                 style={{
                     width: "100%",
@@ -77,6 +136,16 @@ export const Header = ({ onEnter }: HeaderProps) => {
                     <Input
                         autoFocus
                         contentBefore={<SearchRegular />}
+                        // contentAfter={
+                        //     <Button
+                        //         appearance="transparent"
+                        //         size="small"
+                        //         icon={<InfoRegular />}
+                        //         onClick={showTooltip}
+                        //         style={{ WebkitAppRegion: "no-drag" }}
+                        //         aria-label="도움말"
+                        //     />
+                        // }
                         placeholder="무엇을 도와드릴까요?"
                         appearance="filled-darker"
                         value={command}
@@ -103,6 +172,6 @@ export const Header = ({ onEnter }: HeaderProps) => {
                     <Avatar size={36} name="S K" color="red" style={{ backgroundColor: "orange" }} />
                 </div>
             </div>
-        </>
+        </div>
     );
 };
