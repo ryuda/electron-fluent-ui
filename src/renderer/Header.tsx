@@ -102,8 +102,6 @@ export const Header = ({ onEnter }: HeaderProps) => {
                         webkitAppRegion: "drag"
                     }}
                 >
-
-
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <Text size={200} align="end">
                             Sk {/*Hynix*/}

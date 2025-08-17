@@ -61,7 +61,7 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...
