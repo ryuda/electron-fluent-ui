@@ -1,18 +1,10 @@
 import {
     Avatar,
-    Button,
-    Dialog,
-    DialogBody,
-    DialogContent,
-    DialogSurface,
-    DialogTitle,
     Input,
-    makeStyles,
-    Spinner,
     Text
 } from "@fluentui/react-components";
-import { Dismiss24Regular, SearchRegular } from "@fluentui/react-icons";
-import { useEffect, useRef, useState } from "react";
+import { SearchRegular } from "@fluentui/react-icons";
+import { useEffect, useState } from "react";
 
 // Electron 렌더러 프로세스의 window 객체에 대한 타입 확장
 declare global {
@@ -63,7 +55,7 @@ export const Header = ({ onEnter }: HeaderProps) => {
 
             // 창 크기 조정 메시지 전송
             window.electron?.ipcRenderer.send("resize-window-height", 550);
-            
+
             // 입력 필드 초기화
             setCommand("");
         }
@@ -103,10 +95,10 @@ export const Header = ({ onEnter }: HeaderProps) => {
                     }}
                 >
                     <div style={{ display: "flex", flexDirection: "column" }}>
-                        <Text size={200} align="end">
+                        <Text size={200} align="end" style={{ webkitAppRegion: "drag" }}>
                             Sk {/*Hynix*/}
                         </Text>
-                        <Text size={100} align="end"></Text>
+                        <Text size={100} align="end" style={{ webkitAppRegion: "drag" }}></Text>
                     </div>
                     <Avatar size={36} name="S K" color="red" style={{ backgroundColor: "orange" }} />
                 </div>

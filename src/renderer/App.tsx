@@ -93,7 +93,7 @@ export const App = () => {
     };
 
     return (
-        <FluentProvider theme={theme} style={{ height: "100vh", background: "transparent" }}>
+        <FluentProvider theme={theme} style={{ height: "100vh", background: "transparent", WebkitAppRegion: "drag" }}>
             <div
                 style={{
                     height: "100%",
