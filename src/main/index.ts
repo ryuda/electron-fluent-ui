@@ -1,16 +1,20 @@
 import { app, BrowserWindow, ipcMain, nativeTheme, shell } from "electron";
 import { join } from "path";
+import IpcMainEvent = Electron.IpcMainEvent;
+
+
+let mainWindow: BrowserWindow | null = null;
 
 const createBrowserWindow = (): BrowserWindow => {
     const preloadScriptFilePath = join(__dirname, "..", "dist-preload", "index.js");
 
-    return new BrowserWindow({
-        height: 55, // 원하는 높이 설정 (예: 600px)
+    const window = new BrowserWindow({
+        height: 55,
         width: 400,
         autoHideMenuBar: true,
         frame: false,
-        maximizable: false, // 창 최대화 비활성화
-        fullscreenable: false, // 전체 화면 전환 비활성화
+        maximizable: false,
+        fullscreenable: false,
         backgroundMaterial: "mica",
         vibrancy: "header",
         webPreferences: {
@@ -18,8 +22,11 @@ const createBrowserWindow = (): BrowserWindow => {
         },
         icon: join(__dirname, "..", "build", "app-icon-dark.png"),
     }).on("will-resize", (event) => {
-        event.preventDefault(); // 창 크기 조정 시도 차단
+        event.preventDefault();
     });
+
+    mainWindow = window;
+    return window;
 };
 
 const loadFileOrUrl = (browserWindow: BrowserWindow) => {
@@ -50,13 +57,31 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...
+ipcMain.on("resize-window-height", (_, height: number) => {
+    console.log("JK> 리스너 resize-window-height");
+    if (mainWindow) {
+        const [width] = mainWindow.getSize();
+        // console.log(width, height);
+        mainWindow.setSize(width, height);
+    }
+});
 
-// URL 열기 IPC 핸들러
-ipcMain.on('open-url', (_, url) => {
-  shell.openExternal(url)
-    .catch(err => console.error('URL을 열 수 없습니다:', err));
+ipcMain.on("window-close", () => {
+    console.log("JK> 리스너 window-close");
+    if (mainWindow) {
+        // mainWindow.close();
+        const [width] = mainWindow.getSize();
+        mainWindow.setSize(width, 55);
+    }
+});
+
+ipcMain.on("window-minimize", () => {
+    console.log("JK> 리스너 window-minimize");
+    if (mainWindow) {
+        mainWindow.minimize();
+    }
 });

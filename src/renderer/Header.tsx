@@ -1,20 +1,37 @@
-import { Avatar, Input, Text } from "@fluentui/react-components";
-import { SearchRegular } from "@fluentui/react-icons";
-import { useState } from "react";
+import {
+    Avatar,
+    Button,
+    Dialog,
+    DialogBody,
+    DialogContent,
+    DialogSurface,
+    DialogTitle,
+    Input,
+    makeStyles,
+    Spinner,
+    Text
+} from "@fluentui/react-components";
+import { Dismiss24Regular, SearchRegular } from "@fluentui/react-icons";
+import { useEffect, useRef, useState } from "react";
 
 // Electron 렌더러 프로세스의 window 객체에 대한 타입 확장
 declare global {
-  interface Window {
-    electron?: {
-      ipcRenderer: {
-        send: (channel: string, ...args: unknown[]) => void;
-      };
-    };
-  }
+    interface Window {
+        electron?: {
+            ipcRenderer: {
+                send: (channel: string, ...args: unknown[]) => void;
+            };
+        };
+    }
 }
 
 export const Header = () => {
     const [command, setCommand] = useState("");
+    const [url, setUrl] = useState<string>("");
+
+    // 디버깅을 위해 상태 변화 로깅
+    useEffect(() => {
+    }, [url]);
 
     // 명령어 입력 핸들러
     const handleCommandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,77 +40,63 @@ export const Header = () => {
 
     // 엔터 키 입력 시 처리
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && command) {
+        if (e.key === "Enter" && command.trim()) {
+            e.preventDefault(); // 기본 동작 방지
+            console.log("엔터 키 감지됨, 명령어:", command);
+
             // URL 형식 검증
-            let url = command;
+            let processedUrl = command;
 
-            // URL에 프로토콜이 없으면 http:// 추가
-            if (!url.startsWith('http://') && !url.startsWith('https://')) {
-                url = 'https://' + url;
+            // URL에 프로토콜이 없으면 https:// 추가
+            if (!processedUrl.startsWith('http://') && !processedUrl.startsWith('https://')) {
+                processedUrl = 'https://' + processedUrl;
             }
 
-            try {
-                // URL이 유효한지 확인
-                new URL(url);
-
-                // Electron 환경에서 실행 중인 경우 IPC를 통해 URL 열기
-                if (window.electron) {
-                    window.electron.ipcRenderer.send("open-url", url);
-                } else {
-                    // 일반 브라우저 환경에서는 window.open 사용
-                    window.open(url, '_blank');
-                }
-
-                // 입력 필드 초기화
-                setCommand("");
-            } catch (_error) {
-                // 유효하지 않은 URL인 경우 경고 표시
-                alert("유효하지 않은 URL입니다: " + command);
-            }
+            window.electron?.ipcRenderer.send("resize-window-height", 550);
         }
     };
 
-    console.log("JK> Header Render");
     return (
-        <div
-            style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: 20,
-            }}
-        >
-            <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", WebkitAppRegion: "no-drag" }}>
-                <Input
-                    autoFocus
-                    width={"100%"}
-                    contentBefore={<SearchRegular />}
-                    placeholder="무엇을 도와드릴까요?"
-                    appearance="filled-darker"
-                    value={command}
-                    onChange={handleCommandChange}
-                    onKeyDown={handleKeyDown} // 엔터 키 이벤트 처리
-                />
-            </div>
-
+        <>
             <div
                 style={{
+                    width: "100%",
                     display: "flex",
                     flexDirection: "row",
+                    justifyContent: "space-between",
                     alignItems: "center",
                     gap: 10,
                 }}
             >
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Text size={200} align="end">
-                        Sk {/*Hynix*/}
-                    </Text>
-                    <Text size={100} align="end"></Text>
+                <div style={{ flexGrow: 1, display: "flex", flexDirection: "column", WebkitAppRegion: "no-drag" }}>
+                    <Input
+                        autoFocus
+                        width={"100%"}
+                        contentBefore={<SearchRegular />}
+                        placeholder="무엇을 도와드릴까요?"
+                        appearance="filled-darker"
+                        value={command}
+                        onChange={handleCommandChange}
+                        onKeyDown={handleKeyDown}
+                    />
                 </div>
-                <Avatar size={36} name="S K" color="red" style={{ backgroundColor: "orange" }} />
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                    }}
+                >
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        <Text size={200} align="end">
+                            Sk {/*Hynix*/}
+                        </Text>
+                        <Text size={100} align="end"></Text>
+                    </div>
+                    <Avatar size={36} name="S K" color="red" style={{ backgroundColor: "orange" }} />
+                </div>
             </div>
-        </div>
+        </>
     );
 };
