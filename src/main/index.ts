@@ -10,7 +10,7 @@ const createBrowserWindow = (): BrowserWindow => {
 
     const window = new BrowserWindow({
         height: 55,
-        width: 400,
+        width: 450,
         autoHideMenuBar: true,
         frame: false,
         maximizable: false,
@@ -19,6 +19,10 @@ const createBrowserWindow = (): BrowserWindow => {
         vibrancy: "header",
         webPreferences: {
             preload: preloadScriptFilePath,
+            webviewTag: true, // webview 태그 활성화
+            // nodeIntegration: true, // 노드 통합 활성화
+            // contextIsolation: false, // 컨텍스트 격리 비활성화
+
         },
         icon: join(__dirname, "..", "build", "app-icon-dark.png"),
     }).on("will-resize", (event) => {

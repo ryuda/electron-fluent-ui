@@ -8,7 +8,7 @@ import {
     type Theme,
 } from "@fluentui/react-components";
 import { Dismiss24Regular } from "@fluentui/react-icons";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Header } from "./Header";
 
 const shouldUseDarkColors = (): boolean =>
@@ -33,6 +33,7 @@ declare global {
 export const App = () => {
     const [theme, setTheme] = useState<Theme>(getTheme());
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const webviewRef = useRef<Electron.WebviewTag>(null);
 
     useEffect(() => {
         setTimeout(() => {
@@ -113,7 +114,19 @@ export const App = () => {
                         boxSizing: "border-box",
                     }}
                 >
-                    {/* 여기에 추가 메인 콘텐츠를 추가할 수 있습니다 */}
+                    {/* webview로 브라우저 표시 */}
+                    <webview
+                        ref={webviewRef}
+                        src="https://www.google.com" // 초기 URL (Chrome 내부 페이지는 직접 접근이 제한됨)
+                        style={{
+                            width: "100%",
+                            height: "100%",
+                            border: "none",
+                            borderRadius: "8px",
+                            overflow: "hidden",
+                        }}
+                        allowpopups="true"
+                    />
                 </div>
 
                 {/* Header 컴포넌트를 화면 맨 아래에 배치 */}

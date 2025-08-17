@@ -53,6 +53,7 @@ export const Header = () => {
             }
 
             window.electron?.ipcRenderer.send("resize-window-height", 550);
+            setCommand("");
         }
     };
 
