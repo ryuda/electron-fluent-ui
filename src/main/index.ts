@@ -56,7 +56,8 @@ const createTooltipWindow = (params: { x: number, y: number, content: string, wi
         x: params.x,
         y: params.y,
         width: params.width,
-        height: params.height,
+        // 화살표 부분을 고려하여 높이 약간 증가
+        height: params.height + 15,
         frame: false,
         transparent: true,
         skipTaskbar: true,
@@ -71,44 +72,70 @@ const createTooltipWindow = (params: { x: number, y: number, content: string, wi
         },
     });
 
-
-    // HTML 콘텐츠 설정
+    // HTML 콘텐츠 설정 - 말풍선 스타일 적용
     const htmlContent = `
     <!DOCTYPE html>
     <html>
     <head>
         <style>
-             html, body {
+            html, body {
                 margin: 0;
                 padding: 0;
                 height: 100%;
                 overflow: hidden;
-                /*border-radius: 50px; !* html, body에도 border-radius 적용 *!*/
+                background-color: transparent;
             }
         
-            body {
-                margin: 0px;
-                padding: 10px;
+            .tooltip-container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                box-sizing: border-box;
+            }
+            
+            .tooltip-content {
+                position: relative;
+                margin: 0;
+                padding: 15px;
                 background-color: rgba(50, 50, 50, 0.9);
                 color: white;
                 font-family: 'Segoe UI', sans-serif;
-                /*border-radius: 10px;*/
+                border-radius: 12px;
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
-                overflow: hidden;
                 cursor: pointer;
-                
+                width: 100%;
+                height: calc(100% - 15px);
+                box-sizing: border-box;
+            }
+            
+            /* 말풍선 화살표 - 하단 중앙에 위치 */
+            .tooltip-content:after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                margin-left: -10px;
+                width: 0;
+                height: 0;
+                border-left: 10px solid transparent;
+                border-right: 10px solid transparent;
+                border-top: 10px solid rgba(50, 50, 50, 0.9);
             }
         </style>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                document.body.addEventListener('click', () => {
+                document.querySelector('.tooltip-container').addEventListener('click', () => {
                     window.electron.tooltip.hide();
                 });
             });
         </script>
     </head>
     <body>
-        ${params.content}
+        <div class="tooltip-container">
+            <div class="tooltip-content">
+                ${params.content}
+            </div>
+        </div>
     </body>
     </html>
     `;
@@ -159,7 +186,7 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...

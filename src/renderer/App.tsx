@@ -70,7 +70,7 @@ export const App = () => {
             if (window.electron?.tooltip) {
                 // 창의 위치에 기반하여 툴팁 위치 계산
                 const x = Math.round(window.screenX + 10);
-                const y = Math.round(window.screenY - 111); // 메인 창 위에 표시
+                const y = Math.round(window.screenY - 121); // 메인 창 위에 표시
                 
                 window.electron.tooltip.show({
                     x,

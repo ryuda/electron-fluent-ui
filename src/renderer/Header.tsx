@@ -100,7 +100,7 @@ export const Header = ({ onEnter }: HeaderProps) => {
             
             // 헤더 상단에 툴팁 표시
             const x = Math.round(window.screenX + 10);
-            const y = Math.round(window.screenY - 133); // 메인 창 위에 표시
+            const y = Math.round(window.screenY - 113); // 메인 창 위에 표시
             
             window.electron.tooltip.show({
                 x,
@@ -109,7 +109,7 @@ export const Header = ({ onEnter }: HeaderProps) => {
                     <div style="text-align: center;">
                         <h3 style="margin-top: 0;">도움말</h3>
                         <p>검색창에 원하는 내용을 입력하고 엔터 키를 누르세요.</p>
-                        <p style="font-size: 12px; margin-bottom: 0; color: #aaa;">클릭하면 닫힙니다</p>
+<!--                        <p style="font-size: 12px; margin-bottom: 0; color: #aaa;">클릭하면 닫힙니다</p>-->
                     </div>
                 `,
                 width: 430,
@@ -136,16 +136,16 @@ export const Header = ({ onEnter }: HeaderProps) => {
                     <Input
                         autoFocus
                         contentBefore={<SearchRegular />}
-                        // contentAfter={
-                        //     <Button
-                        //         appearance="transparent"
-                        //         size="small"
-                        //         icon={<InfoRegular />}
-                        //         onClick={showTooltip}
-                        //         style={{ WebkitAppRegion: "no-drag" }}
-                        //         aria-label="도움말"
-                        //     />
-                        // }
+                        contentAfter={
+                            <Button
+                                appearance="transparent"
+                                size="small"
+                                icon={<InfoRegular />}
+                                onClick={showTooltip}
+                                style={{ WebkitAppRegion: "no-drag" }}
+                                aria-label="도움말"
+                            />
+                        }
                         placeholder="무엇을 도와드릴까요?"
                         appearance="filled-darker"
                         value={command}
