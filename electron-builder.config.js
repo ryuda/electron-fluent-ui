@@ -10,9 +10,8 @@ const baseConfig = {
         buildResources: "build",
     },
     files: ["dist-main/index.js", "dist-preload/index.js", "dist-renderer/**/*"],
-    extraMetadata: {
-        version: process.env.VITE_APP_VERSION,
-    },
+    extraMetadata: { version: process.env.VITE_APP_VERSION },
+    artifactName: "${productName}-${version}-${os}-${arch}.${ext}", // 선택
 };
 
 /**
@@ -21,26 +20,18 @@ const baseConfig = {
 const platformSpecificConfigurations = {
     darwin: {
         ...baseConfig,
-        afterPack: "./build/macos/codeSign.mjs",
         mac: {
             icon: "build/app-icon-dark.png",
-            target: [{ target: "dmg" }, { target: "zip" }],
+            target: [{ target: "zip" }], // dmg 필요 없으면 zip만
         },
     },
     win32: {
         ...baseConfig,
-        appx: {
-            applicationId: "OliverSchwendener.ElectronFluentUI",
-            backgroundColor: "#1F1F1F",
-            displayName: "Electron Fluent UI",
-            identityName: "1915OliverSchwendener.ElectronFluentUI",
-            publisher: "CN=AD6BF16D-50E3-4FD4-B769-78A606AFF75E",
-            publisherDisplayName: "Oliver Schwendener",
-            languages: ["en-US"],
-        },
+        // ★ appx 설정은 제거(또는 주석 처리) ★
+        // appx: { ... }  // ← 삭제
         win: {
             icon: "build/app-icon-dark.png",
-            target: [{ target: "msi" }, { target: "nsis" }, { target: "zip" }, { target: "appx" }],
+            target: [{ target: "portable" }], // ← 핵심: 포터블 EXE
         },
     },
     linux: {
@@ -48,7 +39,7 @@ const platformSpecificConfigurations = {
         linux: {
             category: "Utility",
             icon: "build/app-icon-dark.png",
-            target: [{ target: "AppImage" }, { target: "deb" }, { target: "zip" }],
+            target: [{ target: "zip" }], // 필요 시 다른 포맷 추가
         },
     },
 };
