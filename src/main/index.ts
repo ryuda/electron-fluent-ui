@@ -2,7 +2,6 @@ import { app, BrowserWindow, ipcMain, nativeTheme, screen, shell } from "electro
 import { join } from "path";
 import IpcMainEvent = Electron.IpcMainEvent;
 
-
 let mainWindow: BrowserWindow | null = null;
 
 const createBrowserWindow = (): BrowserWindow => {
@@ -20,9 +19,6 @@ const createBrowserWindow = (): BrowserWindow => {
         webPreferences: {
             preload: preloadScriptFilePath,
             webviewTag: true, // webview 태그 활성화
-            // nodeIntegration: true, // 노드 통합 활성화
-            // contextIsolation: false, // 컨텍스트 격리 비활성화
-
         },
         icon: join(__dirname, "..", "build", "app-icon-dark.png"),
     }).on("will-resize", (event) => {
@@ -71,6 +67,17 @@ const createTooltipWindow = (params: { x: number, y: number, content: string, wi
             preload: join(__dirname, "..", "dist-preload", "index.js"),
         },
     });
+
+    // HTML 콘텐츠를 수정하여 내용에 도움말11, 도움말22 감지
+    const content = params.content.trim();
+    let urlToOpen = "";
+
+    // 도움말 텍스트에 따라 다른 URL 설정
+    if (content.includes("도움말11")) {
+        urlToOpen = "https://www.google.com/?hl=ko";
+    } else if (content.includes("도움말22")) {
+        urlToOpen = "https://www.naver.com/";
+    }
 
     // HTML 콘텐츠 설정 - 말풍선 스타일 적용
     const htmlContent = `
@@ -125,7 +132,12 @@ const createTooltipWindow = (params: { x: number, y: number, content: string, wi
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('.tooltip-container').addEventListener('click', () => {
-                    window.electron.ipcRenderer.send('tooltip-clicked', 'i-ERP');
+                    const url = "${urlToOpen}";
+                    if (url) {
+                        window.electron.ipcRenderer.send('open-external-url', url);
+                    } else {
+                        window.electron.ipcRenderer.send('tooltip-clicked', 'i-ERP');
+                    }
                     window.electron.tooltip.hide();
                 });
             });
@@ -174,10 +186,16 @@ const registerIpcEventListeners = () => {
 
     // 툴팁 클릭 이벤트 - handleHeaderEnter 트리거
     ipcMain.on("tooltip-clicked", (_, keyword) => {
-        console.log("[index.ts] JK> 툴팁 클릭됨:", keyword);
+        // console.log("[index.ts] JK> 툴팁 클릭됨:", keyword);
         if (mainWindow) {
             mainWindow.webContents.send("tooltip-execute-search", keyword);
         }
+    });
+
+    // 외부 URL 열기 이벤트
+    ipcMain.on("open-external-url", (_, url) => {
+        console.log("[index.ts] JK> 외부 URL 열기:", url);
+        shell.openExternal(url);
     });
 };
 
@@ -195,7 +213,7 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...
@@ -230,10 +248,8 @@ ipcMain.on("app-quit", () => {
     app.quit();
 });
 
-// 툴팁 클릭 이벤트 핸들러 - 전역 스코프에 추가
-ipcMain.on("tooltip-clicked", (_, keyword) => {
-    // console.log("JK> 툴팁 클릭됨 (전역):", keyword);
-    if (mainWindow) {
-        mainWindow.webContents.send("tooltip-execute-search", keyword);
-    }
+// 외부 URL 열기 이벤트 처리 (전역 스코프에도 추가)
+ipcMain.on("open-external-url", (_, url) => {
+    console.log("JK> 외부 URL 열기 (전역):", url);
+    shell.openExternal(url);
 });

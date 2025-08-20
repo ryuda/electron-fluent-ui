@@ -17,7 +17,8 @@ contextBridge.exposeInMainWorld("electron", {
                 "app-quit",
                 "show-tooltip",
                 "hide-tooltip",
-                "tooltip-clicked"
+                "tooltip-clicked",
+                "open-external-url" // 외부 URL 열기 채널 추가
             ];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, ...args);

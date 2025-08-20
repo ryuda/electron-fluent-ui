@@ -61,7 +61,7 @@ export const App = () => {
                 console.log("JK> 툴팁 검색 실행:", keyword);
                 // 직접 handleHeaderEnter 함수 호출
                 handleHeaderEnter(keyword as string);
-                // alert("툴팁 검색 실행");
+                alert("툴팁 검색 실행");
             });
         }
 
