@@ -125,6 +125,7 @@ const createTooltipWindow = (params: { x: number, y: number, content: string, wi
         <script>
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('.tooltip-container').addEventListener('click', () => {
+                    window.electron.ipcRenderer.send('tooltip-clicked', 'i-ERP');
                     window.electron.tooltip.hide();
                 });
             });
@@ -170,6 +171,14 @@ const registerIpcEventListeners = () => {
             tooltipWindow = null;
         }
     });
+
+    // 툴팁 클릭 이벤트 - handleHeaderEnter 트리거
+    ipcMain.on("tooltip-clicked", (_, keyword) => {
+        console.log("[index.ts] JK> 툴팁 클릭됨:", keyword);
+        if (mainWindow) {
+            mainWindow.webContents.send("tooltip-execute-search", keyword);
+        }
+    });
 };
 
 const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) => {
@@ -186,7 +195,7 @@ const registerNativeThemeEventListeners = (allBrowserWindows: BrowserWindow[]) =
     loadFileOrUrl(mainWindow);
     registerIpcEventListeners();
     registerNativeThemeEventListeners(BrowserWindow.getAllWindows());
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
 })();
 
 // 다른 코드...
@@ -219,4 +228,12 @@ ipcMain.on("window-minimize", () => {
 ipcMain.on("app-quit", () => {
     console.log("JK> 리스너 app-quit");
     app.quit();
+});
+
+// 툴팁 클릭 이벤트 핸들러 - 전역 스코프에 추가
+ipcMain.on("tooltip-clicked", (_, keyword) => {
+    // console.log("JK> 툴팁 클릭됨 (전역):", keyword);
+    if (mainWindow) {
+        mainWindow.webContents.send("tooltip-execute-search", keyword);
+    }
 });

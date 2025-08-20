@@ -8,36 +8,25 @@ const shouldUseDarkColors = (): boolean =>
 
 const getTheme = () => (shouldUseDarkColors() ? webDarkTheme : webLightTheme);
 
-// Electron 렌더러 프로세스의 window 객체에 대한 타입 확장
-declare global {
-    interface Window {
-        electron?: {
-            ipcRenderer: {
-                send: (channel: string, ...args: unknown[]) => void;
-            };
-            tooltip?: {
-                show: (options: {
-                    x: number;
-                    y: number;
-                    content: string;
-                    width?: number;
-                    height?: number;
-                }) => void;
-                hide: () => void;
-            };
-        };
-        ContextBridge: {
-            onNativeThemeChanged: (callback: () => void) => void;
-        };
-    }
-}
-
 export const App = () => {
     const [theme, setTheme] = useState<Theme>(getTheme());
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [windowHeight, setWindowHeight] = useState<number>(55);
     const [showHeader, setShowHeader] = useState<boolean>(true);
     const webviewRef = useRef<Electron.WebviewTag>(null);
+
+    // Header의 엔터 키 입력 이벤트 처리
+    const handleHeaderEnter = (keyword: string) => {
+        console.log("JK> handleHeaderEnter", keyword);
+        // 웹뷰의 URL 변경
+        if (webviewRef.current && keyword) {
+            webviewRef.current.src = "https://google.com/search?q=" + keyword;
+        }
+
+        // 창 크기 변경 및 Header 숨기기
+        window.electron?.ipcRenderer.send("resize-window-height", 550);
+        document.dispatchEvent(new CustomEvent("window-resize", { detail: { height: 550 } }));
+    };
 
     useEffect(() => {
         setTimeout(() => {
@@ -65,13 +54,25 @@ export const App = () => {
             setShowHeader(true);
         });
 
+        // 툴팁 클릭 이벤트 처리 (handleHeaderEnter 호출)
+        if (window.electron?.ipcRenderer) {
+            console.log("JK> 이벤트 리스너 등록: tooltip-execute-search");
+            window.electron.ipcRenderer.on("tooltip-execute-search", (keyword) => {
+                console.log("JK> 툴팁 검색 실행:", keyword);
+                // 직접 handleHeaderEnter 함수 호출
+                handleHeaderEnter(keyword as string);
+                // alert("툴팁 검색 실행");
+            });
+        }
+
+
         // 앱이 시작될 때 툴팁 표시 (지연 적용)
         const tooltipTimer = setTimeout(() => {
             if (window.electron?.tooltip) {
                 // 창의 위치에 기반하여 툴팁 위치 계산
                 const x = Math.round(window.screenX + 10);
                 const y = Math.round(window.screenY - 121); // 메인 창 위에 표시
-                
+
                 window.electron.tooltip.show({
                     x,
                     y,
@@ -81,14 +82,14 @@ export const App = () => {
                             <p>검색창에 원하는 내용을 입력하고 엔터 키를 누르면,<br/>
                                검색 결과가 표시됩니다.
                             </p>
-                            <!--<p style="font-size: 12px; margin-bottom: 0; color: #aaa;">이 툴팁을 클릭하면 닫힙니다</p>-->
+                            <p style="font-size: 12px; margin-bottom: 0; color: #aaa;">이 툴팁을 클릭하면 검색이 실행됩니다</p>
                         </div>
                     `,
                     width: 430,
                     height: 110
                 });
             }
-        }, 500); // 1.5초 후 표시
+        }, 500); // 0.5초 후 표시
 
         return () => {
             document.removeEventListener("window-resize", handleWindowResize as EventListener);
@@ -112,19 +113,6 @@ export const App = () => {
     // 창 최소화 핸들러
     const handleMinimize = () => {
         window.electron?.ipcRenderer.send("window-minimize");
-    };
-
-    // Header의 엔터 키 입력 이벤트 처리
-    const handleHeaderEnter = (keyword: string) => {
-        console.log("JK> handleHeaderEnter", keyword);
-        // 웹뷰의 URL 변경
-        if (webviewRef.current && keyword) {
-            webviewRef.current.src = "https://google.com/search?q=" + keyword;
-        }
-
-        // 창 크기 변경 및 Header 숨기기
-        window.electron?.ipcRenderer.send("resize-window-height", 550);
-        document.dispatchEvent(new CustomEvent("window-resize", { detail: { height: 550 } }));
     };
 
     return (

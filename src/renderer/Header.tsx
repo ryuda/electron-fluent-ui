@@ -37,6 +37,7 @@ export const Header = ({ onEnter }: HeaderProps) => {
     const [keyword, setKeyword] = useState<string>("");
     const [tooltipVisible, setTooltipVisible] = useState(false);
     const headerRef = useRef<HTMLDivElement>(null);
+    const [count, setCount] = useState(true);
 
     // 디버깅을 위해 상태 변화 로깅
     useEffect(() => {
@@ -94,30 +95,54 @@ export const Header = ({ onEnter }: HeaderProps) => {
     // 툴팁 표시 함수
     const showTooltip = (e: React.MouseEvent) => {
         e.stopPropagation(); // 이벤트 전파 방지
-        
-        if (headerRef.current && window.electron?.tooltip) {
-            const rect = headerRef.current.getBoundingClientRect();
-            
-            // 헤더 상단에 툴팁 표시
-            const x = Math.round(window.screenX + 10);
-            const y = Math.round(window.screenY - 113); // 메인 창 위에 표시
-            
-            window.electron.tooltip.show({
-                x,
-                y,
-                content: `
+
+        if (count) {
+            if (headerRef.current && window.electron?.tooltip) {
+                const rect = headerRef.current.getBoundingClientRect();
+
+                // 헤더 상단에 툴팁 표시
+                const x = Math.round(window.screenX + 10);
+                const y = Math.round(window.screenY - 113); // 메인 창 위에 표시
+
+                window.electron.tooltip.show({
+                    x,
+                    y,
+                    content: `
                     <div style="text-align: center;">
-                        <h3 style="margin-top: 0;">도움말</h3>
-                        <p>검색창에 원하는 내용을 입력하고 엔터 키를 누르세요.</p>
-<!--                        <p style="font-size: 12px; margin-bottom: 0; color: #aaa;">클릭하면 닫힙니다</p>-->
+                        <h3 style="margin-top: 0;">도움말11</h3>
                     </div>
                 `,
-                width: 430,
-                height: 100
-            });
+                    width: 430,
+                    height: 100
+                });
 
-            setTooltipVisible(true);
+                setTooltipVisible(true);
+
+            }
+        } else {
+            if (headerRef.current && window.electron?.tooltip) {
+                const rect = headerRef.current.getBoundingClientRect();
+
+                // 헤더 상단에 툴팁 표시
+                const x = Math.round(window.screenX + 10);
+                const y = Math.round(window.screenY - 113); // 메인 창 위에 표시
+
+                window.electron.tooltip.show({
+                    x,
+                    y,
+                    content: `
+                    <div style="text-align: center;">
+                        <h3 style="margin-top: 0;">도움말22</h3>
+                    </div>
+                `,
+                    width: 430,
+                    height: 100
+                });
+
+                setTooltipVisible(true);
+            }
         }
+        setCount(!count);
     };
 
     return (

@@ -11,17 +11,25 @@ contextBridge.exposeInMainWorld("electron", {
         send: (channel: string, ...args: unknown[]) => {
             // 유효한 채널 목록에 툴팁 관련 채널 추가
             const validChannels = [
-                "resize-window-height", 
-                "window-minimize", 
-                "window-close", 
+                "resize-window-height",
+                "window-minimize",
+                "window-close",
                 "app-quit",
                 "show-tooltip",
-                "hide-tooltip"
+                "hide-tooltip",
+                "tooltip-clicked"
             ];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, ...args);
             }
         },
+        on: (channel: string, callback: (...args: unknown[]) => void) => {
+            const validChannels = ["tooltip-execute-search"];
+            if (validChannels.includes(channel)) {
+                // 이벤트 핸들러 등록
+                ipcRenderer.on(channel, (_, ...args) => callback(...args));
+            }
+        }
     },
     // 툴팁 관련 편의 함수 추가
     tooltip: {
